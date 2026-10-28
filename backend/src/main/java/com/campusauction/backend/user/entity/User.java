@@ -1,10 +1,17 @@
 package com.campusauction.backend.user.entity;
 
 import jakarta.persistence.*;
+import lombok.AllArgsConstructor;
+import lombok.Data;
+import lombok.NoArgsConstructor;
+
 import java.time.LocalDateTime;
 
 @Entity
 @Table(name = "users")
+@Data
+@AllArgsConstructor
+@NoArgsConstructor
 public class User {
 
     @Id
@@ -17,23 +24,14 @@ public class User {
     @Column(nullable = false, unique = true, length = 254)
     private String email;
 
-    @Column(name = "password_hash", nullable = false)
-    private String passwordHash;
+    @Column(name = "password", nullable = false)
+    private String password;
 
     @Column(name = "created_at", nullable = false, updatable = false)
     private LocalDateTime createdAt;
 
     @Column(name = "updated_at", nullable = false)
     private LocalDateTime updatedAt;
-
-    protected User() {
-    }
-
-    public User(String name, String email, String passwordHash) {
-        this.name = name;
-        this.email = email;
-        this.passwordHash = passwordHash;
-    }
 
     @PrePersist
     protected void onCreate() {
@@ -47,27 +45,5 @@ public class User {
         updatedAt = LocalDateTime.now();
     }
 
-    public Long getId() {
-        return id;
-    }
-
-    public String getName() {
-        return name;
-    }
-
-    public String getEmail() {
-        return email;
-    }
-
-    public String getPasswordHash() {
-        return passwordHash;
-    }
-
-    public LocalDateTime getCreatedAt() {
-        return createdAt;
-    }
-
-    public LocalDateTime getUpdatedAt() {
-        return updatedAt;
-    }
+  
 }
