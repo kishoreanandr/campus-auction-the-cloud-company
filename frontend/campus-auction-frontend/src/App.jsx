@@ -3,6 +3,7 @@ import { useState } from "react";
 import Navbar from "./components/Navbar";
 import Home from "./pages/Home";
 import ListingDetails from "./pages/ListingDetails";
+import CreateListing from "./pages/CreateListing";
 import "./App.css";
 
 function App() {
@@ -43,7 +44,7 @@ function App() {
         )}
 
         {currentPage === "create" && (
-          <h1>Create a Listing</h1>
+          <CreateListing onBack={handleBackToHome} />
         )}
       </main>
     </>
