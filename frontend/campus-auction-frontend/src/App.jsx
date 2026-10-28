@@ -2,22 +2,40 @@
 import { useState } from "react";
 import Navbar from "./components/Navbar";
 import Home from "./pages/Home";
+import ListingDetails from "./pages/ListingDetails";
 import "./App.css";
 
 function App() {
   const [currentPage, setCurrentPage] = useState("home");
+  const [selectedListing, setSelectedListing] = useState(null);
 
-  function handleViewListing(listingId) {
-    alert("You selected listing ID: " + listingId);
+  function handleViewListing(listing) {
+    setSelectedListing(listing);
+    setCurrentPage("details");
+  }
+
+  function handleBackToHome() {
+    setCurrentPage("home");
+    setSelectedListing(null);
   }
 
   return (
     <>
-      <Navbar onNavigate={setCurrentPage} />
+      <Navbar onNavigate={(page) => {
+        setSelectedListing(null);
+        setCurrentPage(page);
+      }} />
 
       <main className="page-content">
         {currentPage === "home" && (
           <Home onViewListing={handleViewListing} />
+        )}
+
+        {currentPage === "details" && (
+          <ListingDetails
+            listing={selectedListing}
+            onBack={handleBackToHome}
+          />
         )}
 
         {currentPage === "my-listings" && (
