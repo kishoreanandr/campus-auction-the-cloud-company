@@ -15,15 +15,15 @@ public interface ListingRepository extends JpaRepository<Listing, Long> {
 
 	List<Listing> findBySellerIdOrderByCreatedAtDesc(Long sellerId);
 	
-	 @Query("""
-		        SELECT l FROM Listing l
-		        WHERE l.status = 'ACTIVE'
-		          AND l.closingAt > :now
-		          AND (:category IS NULL OR LOWER(l.category) = LOWER(:category))
-		          AND (:search IS NULL OR
-		               LOWER(l.title) LIKE LOWER(CONCAT('%', :search, '%')))
-		        ORDER BY l.closingAt ASC
-		        """)
+			 @Query("""
+				        SELECT l FROM Listing l
+				        WHERE l.status = 'ACTIVE'
+				          AND l.closingAt > :now
+				          AND (:category IS NULL OR LOWER(l.category) = LOWER(:category))
+				          AND (:search IS NULL OR
+				               LOWER(l.title) LIKE LOWER(CONCAT('%', :search, '%')))
+				        ORDER BY l.closingAt ASC
+				        """)
 		    List<Listing> browseListings(
 		            @Param("now") LocalDateTime now,
 		            @Param("category") String category,
