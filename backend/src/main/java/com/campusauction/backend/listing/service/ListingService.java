@@ -5,6 +5,8 @@ import java.util.List;
 
 import org.springframework.stereotype.Service;
 
+import com.campusauction.backend.bidding.entity.Bid;
+import com.campusauction.backend.bidding.repository.BidRepository;
 import com.campusauction.backend.listing.dto.ListingRequest;
 import com.campusauction.backend.listing.dto.ListingResponse;
 import com.campusauction.backend.listing.entity.Listing;
@@ -19,12 +21,15 @@ import jakarta.transaction.Transactional;
 public class ListingService {
 	 	private final ListingRepository listingRepository;
 	    private final UserRepository userRepository;
+	    private final BidRepository bidRepository;
 
 	    public ListingService(
 	            ListingRepository listingRepository,
-	            UserRepository userRepository) {
+	            UserRepository userRepository,
+	            BidRepository bidRepository) {
 	        this.listingRepository = listingRepository;
 	        this.userRepository = userRepository;
+	        this.bidRepository=bidRepository;
 	    }
 	    
 	    @Transactional
@@ -206,5 +211,45 @@ public class ListingService {
 	        listing.setStatus("CANCELLED");
 	        listingRepository.save(listing);
 	    }
+		 
+		 @Transactional
+		    public ListingResponse closeAuction(Long listingId)
+		            throws ListingNotFoundException, ListingRuleException {
+
+		        Listing listing = findListing(listingId);
+
+		        if (!"ACTIVE".equals(listing.getStatus())) {
+		            throw new ListingRuleException(
+		                    "Only active auctions can be closed."
+		            );
+		        }
+
+		        LocalDateTime now = LocalDateTime.now();
+
+		        if (listing.getClosingAt().isAfter(now)) {
+		            throw new ListingRuleException(
+		                    "The auction closing time has not been reached."
+		            );
+		        }
+
+		        var highestBid = bidRepository
+		                .findFirstByListingIdOrderByAmountDescBidTimeAscIdAsc(
+		                        listingId
+		                );
+
+		        if (highestBid.isEmpty()) {
+		            listing.setStatus("UNSOLD");
+		            listing.setCurrentHighestBid(null);
+		        } else {
+		            Bid winningBid = highestBid.get();
+
+		            listing.setStatus("PENDING_SELLER_APPROVAL");
+		            listing.setCurrentHighestBid(winningBid.getAmount());
+		        }
+
+		        Listing savedListing = listingRepository.save(listing);
+
+		        return convertToListingResponse(savedListing);
+		    }
 
 }

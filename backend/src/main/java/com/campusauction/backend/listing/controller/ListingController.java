@@ -72,4 +72,14 @@ public class ListingController {
     ) {
         return listingService.browseListings(category, search);
     }
+    
+    @PostMapping("/{id}/close")
+    public ResponseEntity<ListingResponse> closeAuction(
+            @PathVariable Long id) throws ListingNotFoundException,
+                                        ListingRuleException {
+
+        ListingResponse response = listingService.closeAuction(id);
+
+        return ResponseEntity.ok(response);
+    }
 }

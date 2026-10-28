@@ -29,5 +29,10 @@ public interface ListingRepository extends JpaRepository<Listing, Long> {
 		            @Param("category") String category,
 		            @Param("search") String search
 		    );
+			 
+			 List<Listing> findByStatusAndClosingAtLessThanEqual(
+				        String status,
+				        LocalDateTime closingAt
+				);
 
 }
