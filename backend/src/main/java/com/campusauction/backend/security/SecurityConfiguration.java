@@ -43,25 +43,25 @@ public class SecurityConfiguration {
                 .authorizeHttpRequests(authorize -> authorize
                         .requestMatchers("/api/auth/**").permitAll()
                         .requestMatchers(HttpMethod.GET, "/api/listings/mine")
-                        .hasAnyRole("USER", "BIDDER")
-                        .requestMatchers(HttpMethod.POST, "/api/listings/*/bids")
                         .hasRole("BIDDER")
+                        .requestMatchers(HttpMethod.POST, "/api/listings/*/bids")
+                        .hasRole("USER")
                         .requestMatchers(HttpMethod.POST, "/api/listings/*/close")
                         .hasRole("ADMIN")
                         .requestMatchers(HttpMethod.POST, "/api/listings/*/images")
-                        .hasAnyRole("USER", "BIDDER")
+                        .hasRole("BIDDER")
                         .requestMatchers(HttpMethod.POST, "/api/listings")
                         .hasRole("BIDDER")
                         .requestMatchers(HttpMethod.PUT, "/api/listings/*")
-                        .hasAnyRole("USER", "BIDDER")
+                        .hasRole("BIDDER")
                         .requestMatchers(HttpMethod.DELETE, "/api/listings/*")
-                        .hasAnyRole("USER", "BIDDER")
+                        .hasRole("BIDDER")
                         .requestMatchers(
                                 HttpMethod.POST,
                                 "/api/listings/*/approve",
                                 "/api/listings/*/reject"
                         )
-                        .hasAnyRole("USER", "BIDDER")
+                        .hasRole("BIDDER")
                         .requestMatchers(HttpMethod.GET, "/api/listings/**")
                         .permitAll()
                         .requestMatchers(HttpMethod.OPTIONS, "/**").permitAll()

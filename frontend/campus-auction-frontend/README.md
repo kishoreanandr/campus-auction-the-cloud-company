@@ -16,7 +16,11 @@ Vite. For a production frontend hosted separately, also configure the backend CO
 origins with `CORS_ALLOWED_ORIGINS` on the backend, for example
 `https://auction.example.edu`.
 
-The frontend includes registration/login, public listing search, bidder listing
-creation, image upload, listing details and bid history, bidder actions, and
-authenticated listing management. Register as `BIDDER` to post listings and place
-bids.
+The frontend includes registration/login, public listing search, listing creation
+and image upload for `BIDDER` (seller/lister) accounts, and bidding for `USER`
+(student/bidder) accounts. Sellers can manage their own listings; students can
+view listing details and bid history. Signed-in students can enable browser
+notifications; the app checks auction
+changes every 30 seconds while open, shows in-app alerts in the foreground, and
+uses browser pop-ups when the tab is in the background. Browser notifications
+require permission and a secure browser context (HTTPS or localhost).

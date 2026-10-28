@@ -1,5 +1,24 @@
 
-function Navbar({ user, onNavigate, onLogout }) {
+function Navbar({
+  user,
+  notificationPermission,
+  onEnableNotifications,
+  onNavigate,
+  onLogout,
+}) {
+  async function handleEnableNotifications() {
+    try {
+      const result = await onEnableNotifications();
+      if (result === "denied") {
+        window.alert("Notifications are blocked. Allow them in your browser's site settings.");
+      } else if (result === "unsupported") {
+        window.alert("This browser does not support desktop notifications.");
+      }
+    } catch (error) {
+      window.alert(`Could not enable notifications: ${error.message}`);
+    }
+  }
+
   return (
     <header className="navbar">
       <button
@@ -14,7 +33,7 @@ function Navbar({ user, onNavigate, onLogout }) {
           Home
         </button>
 
-        {user && (
+        {user?.role === "BIDDER" && (
           <button onClick={() => onNavigate("my-listings")}>
             My Listings
           </button>
@@ -31,6 +50,32 @@ function Navbar({ user, onNavigate, onLogout }) {
 
         {user ? (
           <>
+            {["USER", "BIDDER"].includes(user.role) && (
+              <button
+                type="button"
+                onClick={handleEnableNotifications}
+                disabled={
+                  notificationPermission === "granted"
+                  || notificationPermission === "denied"
+                  || notificationPermission === "unsupported"
+                }
+                title={
+                  notificationPermission === "granted"
+                    ? "Browser notifications are enabled"
+                    : notificationPermission === "denied"
+                      ? "Allow notifications in your browser site settings"
+                      : "Allow notifications for auction updates"
+                }
+              >
+                {notificationPermission === "granted"
+                  ? "Notifications on"
+                  : notificationPermission === "denied"
+                    ? "Notifications blocked"
+                    : notificationPermission === "unsupported"
+                      ? "Notifications unavailable"
+                  : "Enable notifications"}
+              </button>
+            )}
             <span className="navbar-user">
               {user.name} ({user.role})
             </span>

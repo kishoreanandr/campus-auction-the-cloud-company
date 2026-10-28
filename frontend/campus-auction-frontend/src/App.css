@@ -52,6 +52,42 @@
   font-size: 13px;
 }
 
+.notification-stack {
+  position: fixed;
+  z-index: 10;
+  top: 76px;
+  right: 20px;
+  display: grid;
+  gap: 10px;
+  width: min(380px, calc(100vw - 40px));
+}
+
+.notification-toast {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 14px;
+  padding: 14px 16px;
+  border: 1px solid #bfdbfe;
+  border-radius: 8px;
+  background: white;
+  box-shadow: 0 8px 24px rgb(15 23 42 / 12%);
+}
+
+.notification-toast p {
+  margin: 5px 0 0;
+  color: #475569;
+  font-size: 14px;
+}
+
+.notification-toast button {
+  border: 0;
+  background: transparent;
+  color: #64748b;
+  font-size: 20px;
+  cursor: pointer;
+}
+
 .navbar-links button:disabled,
 .submit-listing-button:disabled,
 .view-button:disabled {

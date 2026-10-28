@@ -7,7 +7,7 @@ function AuthPage({ onAuthenticated }) {
     name: "",
     email: "",
     password: "",
-    role: "BIDDER",
+    role: "USER",
   });
   const [error, setError] = useState("");
   const [submitting, setSubmitting] = useState(false);
@@ -50,7 +50,7 @@ function AuthPage({ onAuthenticated }) {
         <h1>{mode === "register" ? "Create your account" : "Welcome back"}</h1>
         <p>
           {mode === "register"
-            ? "Register to bid and list items on campus."
+            ? "Create an account to bid on campus listings."
             : "Sign in to your Campus Auction account."}
         </p>
 
@@ -104,8 +104,8 @@ function AuthPage({ onAuthenticated }) {
                 value={formData.role}
                 onChange={handleChange}
               >
-                <option value="BIDDER">Bidder (can also post listings)</option>
-                <option value="USER">User</option>
+                <option value="USER">Student / bidder (places bids)</option>
+                <option value="BIDDER">Seller / lister (posts auctions)</option>
               </select>
             </>
           )}

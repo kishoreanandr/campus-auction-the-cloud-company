@@ -9,11 +9,18 @@ import "./App.css";
 
 import MyListings from "./pages/MyListings";
 import { clearAuth, getStoredAuth, storeAuth } from "./services/api";
+import { useAuctionNotifications } from "./hooks/useAuctionNotifications";
 
 function App() {
   const [currentPage, setCurrentPage] = useState("home");
   const [selectedListingId, setSelectedListingId] = useState(null);
   const [auth, setAuth] = useState(getStoredAuth);
+  const {
+    notifications,
+    permission,
+    enableNotifications,
+    dismissNotification,
+  } = useAuctionNotifications(auth?.user);
 
   function handleViewListing(listingId) {
     setSelectedListingId(listingId);
@@ -41,6 +48,8 @@ function App() {
     <>
       <Navbar
         user={auth?.user}
+        notificationPermission={permission}
+        onEnableNotifications={enableNotifications}
         onLogout={handleLogout}
         onNavigate={(page) => {
           setSelectedListingId(null);
@@ -49,6 +58,24 @@ function App() {
       />
 
       <main className="page-content">
+        <div className="notification-stack" aria-live="polite">
+          {notifications.map((notification) => (
+            <article className="notification-toast" key={notification.id}>
+              <div>
+                <strong>{notification.title}</strong>
+                <p>{notification.body}</p>
+              </div>
+              <button
+                type="button"
+                aria-label="Dismiss notification"
+                onClick={() => dismissNotification(notification.id)}
+              >
+                ×
+              </button>
+            </article>
+          ))}
+        </div>
+
         {currentPage === "home" && (
           <Home onViewListing={handleViewListing} />
         )}

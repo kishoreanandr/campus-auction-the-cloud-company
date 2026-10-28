@@ -152,8 +152,8 @@ function ListingDetails({ listingId, user, onBack }) {
   }
 
   const canManageListing =
-    user && user.id === listing.sellerId && ["USER", "BIDDER"].includes(user.role);
-  const canPlaceBid = user?.role === "BIDDER" && user.id !== listing.sellerId;
+    user?.role === "BIDDER" && user.id === listing.sellerId;
+  const canPlaceBid = user?.role === "USER" && user.id !== listing.sellerId;
   const isAuctionOpen =
     listing.status === "ACTIVE" && new Date(listing.closingAt) > new Date();
 
@@ -255,7 +255,10 @@ function ListingDetails({ listingId, user, onBack }) {
             </form>
           )}
 
-          {!user && <p>Sign in as a bidder to place a bid.</p>}
+          {!user && <p>Sign in as a student to place a bid.</p>}
+          {user?.role === "BIDDER" && user.id === listing.sellerId && (
+            <p>You posted this auction and cannot bid on your own item.</p>
+          )}
 
           {canManageListing && listing.status === "PENDING_SELLER_APPROVAL" && (
             <div className="status-actions">
