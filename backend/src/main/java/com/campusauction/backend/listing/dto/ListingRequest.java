@@ -19,10 +19,6 @@ import java.time.LocalDateTime;
 @Setter
 public class ListingRequest {
 
-    @NotNull(message = "Seller ID is required during development")
-    @Positive(message = "Seller ID must be positive")
-    private Long sellerId;
-
     @NotBlank(message = "Title is required")
     @Size(max = 150, message = "Title cannot exceed 150 characters")
     private String title;
@@ -50,14 +46,6 @@ public class ListingRequest {
 
     @NotNull(message = "Closing date and time are required")
     private LocalDateTime closingAt;
-
-	public Long getSellerId() {
-		return sellerId;
-	}
-
-	public void setSellerId(Long sellerId) {
-		this.sellerId = sellerId;
-	}
 
 	public String getTitle() {
 		return title;

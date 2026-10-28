@@ -3,6 +3,7 @@ package com.campusauction.backend.bidding.controller;
 
 
 import jakarta.validation.Valid;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -10,6 +11,7 @@ import org.springframework.web.bind.annotation.*;
 import com.campusauction.backend.bidding.dto.BidRequest;
 import com.campusauction.backend.bidding.dto.BidResponse;
 import com.campusauction.backend.bidding.service.BidService;
+import com.campusauction.backend.security.AuthPrincipal;
 
 import java.util.List;
 
@@ -27,9 +29,14 @@ public class BidController {
     @PostMapping
     public ResponseEntity<BidResponse> placeBid(
             @PathVariable Long listingId,
+            @AuthenticationPrincipal AuthPrincipal principal,
             @Valid @RequestBody BidRequest request
     ) {
-        BidResponse response = bidService.placeBid(listingId, request);
+        BidResponse response = bidService.placeBid(
+                listingId,
+                principal.getUserId(),
+                request
+        );
         return ResponseEntity.status(HttpStatus.CREATED).body(response);
     }
 

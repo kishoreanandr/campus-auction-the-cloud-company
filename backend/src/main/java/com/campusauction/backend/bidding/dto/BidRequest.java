@@ -5,15 +5,10 @@ package com.campusauction.backend.bidding.dto;
 import jakarta.validation.constraints.DecimalMin;
 import jakarta.validation.constraints.Digits;
 import jakarta.validation.constraints.NotNull;
-import jakarta.validation.constraints.Positive;
 
 import java.math.BigDecimal;
 
 public class BidRequest {
-
-    @NotNull(message = "Bidder ID is required")
-    @Positive(message = "Bidder ID must be positive")
-    private Long bidderId;
 
     @NotNull(message = "Bid amount is required")
     @DecimalMin(value = "0.01", message = "Bid amount must be greater than zero")
@@ -22,14 +17,6 @@ public class BidRequest {
     private BigDecimal amount;
 
     public BidRequest() {
-    }
-
-    public Long getBidderId() {
-        return bidderId;
-    }
-
-    public void setBidderId(Long bidderId) {
-        this.bidderId = bidderId;
     }
 
     public BigDecimal getAmount() {

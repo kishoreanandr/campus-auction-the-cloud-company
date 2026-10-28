@@ -36,7 +36,7 @@ public class BidService {
     }
 
     @Transactional
-    public BidResponse placeBid(Long listingId, BidRequest request) {
+    public BidResponse placeBid(Long listingId, Long bidderId, BidRequest request) {
 
         // 1. Find the auction listing.
         Listing listing = listingRepository.findById(listingId)
@@ -61,10 +61,10 @@ public class BidService {
         }
 
         // 3. Find the bidder.
-        User bidder = userRepository.findById(request.getBidderId())
+        User bidder = userRepository.findById(bidderId)
                 .orElseThrow(() ->
                         new IllegalArgumentException(
-                                "Bidder not found: " + request.getBidderId()
+                                "Bidder not found: " + bidderId
                         ));
 
         // 4. A seller cannot bid on their own listing.

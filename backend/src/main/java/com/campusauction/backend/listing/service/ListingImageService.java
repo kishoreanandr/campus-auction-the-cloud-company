@@ -51,6 +51,7 @@ public class ListingImageService {
     @Transactional
     public ListingImage uploadImage(
             Long listingId,
+            Long sellerId,
             MultipartFile file
     ) {
         Listing listing = listingRepository.findById(listingId)
@@ -62,6 +63,12 @@ public class ListingImageService {
         if (!"ACTIVE".equals(listing.getStatus())) {
             throw new IllegalArgumentException(
                     "Images can only be added to active listings"
+            );
+        }
+
+        if (!listing.getSellerId().equals(sellerId)) {
+            throw new IllegalArgumentException(
+                    "You can only add images to your own listings"
             );
         }
 

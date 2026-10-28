@@ -33,10 +33,10 @@ public class ListingService {
 	    }
 	    
 	    @Transactional
-	    public ListingResponse createListing(ListingRequest request) throws ListingRuleException {
+	    public ListingResponse createListing(Long sellerId, ListingRequest request) throws ListingRuleException {
 	        validateClosingTime(request.getClosingAt());
 
-	        if (!userRepository.existsById(request.getSellerId())) {
+	        if (!userRepository.existsById(sellerId)) {
 	            throw new ListingRuleException(
 	                    "Seller does not exist. Use an existing user ID."
 	            );
@@ -45,7 +45,7 @@ public class ListingService {
 	        Listing listing = new Listing();
 	        copyRequestToListing(request, listing);
 
-	        listing.setSellerId(request.getSellerId());
+	        listing.setSellerId(sellerId);
 	        listing.setStatus("ACTIVE");
 
 	        return convertToListingResponse(listingRepository.save(listing));
@@ -85,11 +85,12 @@ public class ListingService {
 	    @Transactional
 	    public ListingResponse updateListing(
 	            Long id,
-	            ListingRequest request
+	            ListingRequest request,
+	            Long sellerId
 	    ) throws ListingRuleException, ListingNotFoundException {
 	        Listing listing = findListing(id);
 
-	        checkOwnership(listing, request.getSellerId());
+	        checkOwnership(listing, sellerId);
 	        checkCanBeChanged(listing);
 	        validateClosingTime(request.getClosingAt());
 

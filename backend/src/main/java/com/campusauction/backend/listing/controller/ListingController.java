@@ -2,6 +2,7 @@ package com.campusauction.backend.listing.controller;
 
 
 import jakarta.validation.Valid;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -11,6 +12,7 @@ import com.campusauction.backend.listing.dto.ListingResponse;
 import com.campusauction.backend.listing.exception.ListingNotFoundException;
 import com.campusauction.backend.listing.exception.ListingRuleException;
 import com.campusauction.backend.listing.service.ListingService;
+import com.campusauction.backend.security.AuthPrincipal;
 
 import java.util.List;
 
@@ -26,9 +28,13 @@ public class ListingController {
 
     @PostMapping
     public ResponseEntity<ListingResponse> createListing(
+            @AuthenticationPrincipal AuthPrincipal principal,
             @Valid @RequestBody ListingRequest request
     ) throws ListingRuleException {
-        return new ResponseEntity<ListingResponse>(listingService.createListing(request),HttpStatus.CREATED);
+        return new ResponseEntity<ListingResponse>(
+                listingService.createListing(principal.getUserId(), request),
+                HttpStatus.CREATED
+        );
     }
 
     @GetMapping
@@ -38,9 +44,12 @@ public class ListingController {
 
     @GetMapping("/mine")
     public ResponseEntity<List<ListingResponse>> getSellerListings(
-            @RequestParam Long sellerId
+            @AuthenticationPrincipal AuthPrincipal principal
     ) throws ListingRuleException {
-        return new ResponseEntity<List<ListingResponse>>(listingService.getSellerListings(sellerId),HttpStatus.OK);
+        return new ResponseEntity<List<ListingResponse>>(
+                listingService.getSellerListings(principal.getUserId()),
+                HttpStatus.OK
+        );
     }
 
     @GetMapping("/{id}")
@@ -51,18 +60,22 @@ public class ListingController {
     @PutMapping("/{id}")
     public ResponseEntity<ListingResponse> updateListing(
             @PathVariable Long id,
+            @AuthenticationPrincipal AuthPrincipal principal,
             @Valid @RequestBody ListingRequest request
     ) throws ListingRuleException, ListingNotFoundException {
-        return new ResponseEntity<ListingResponse>(listingService.updateListing(id, request),HttpStatus.OK);
+        return new ResponseEntity<ListingResponse>(
+                listingService.updateListing(id, request, principal.getUserId()),
+                HttpStatus.OK
+        );
     }
 
     @DeleteMapping("/{id}")
     @ResponseStatus(HttpStatus.NO_CONTENT)
     public void cancelListing(
             @PathVariable Long id,
-            @RequestParam Long sellerId
+            @AuthenticationPrincipal AuthPrincipal principal
     ) throws ListingNotFoundException, ListingRuleException {
-        listingService.cancelListing(id, sellerId);
+        listingService.cancelListing(id, principal.getUserId());
     }
     
     @GetMapping("/browse")
@@ -86,22 +99,22 @@ public class ListingController {
 @PostMapping("/{id}/approve")
 public ResponseEntity<ListingResponse> approveWinningBid(
         @PathVariable Long id,
-        @RequestParam Long sellerId)
+        @AuthenticationPrincipal AuthPrincipal principal)
         throws ListingNotFoundException, ListingRuleException {
 
     return ResponseEntity.ok(
-            listingService.approveWinningBid(id, sellerId)
+            listingService.approveWinningBid(id, principal.getUserId())
     );
 }
 	
 	@PostMapping("/{id}/reject")
 	public ResponseEntity<ListingResponse> rejectWinningBid(
 	        @PathVariable Long id,
-	        @RequestParam Long sellerId)
+	        @AuthenticationPrincipal AuthPrincipal principal)
 	        throws ListingNotFoundException, ListingRuleException {
 	
 	    return ResponseEntity.ok(
-	            listingService.rejectWinningBid(id, sellerId)
+	            listingService.rejectWinningBid(id, principal.getUserId())
 	    );
 	}
 
