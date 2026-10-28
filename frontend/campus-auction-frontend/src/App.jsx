@@ -6,6 +6,8 @@ import ListingDetails from "./pages/ListingDetails";
 import CreateListing from "./pages/CreateListing";
 import "./App.css";
 
+import MyListings from "./pages/MyListings";
+
 function App() {
   const [currentPage, setCurrentPage] = useState("home");
   const [selectedListing, setSelectedListing] = useState(null);
@@ -40,7 +42,9 @@ function App() {
         )}
 
         {currentPage === "my-listings" && (
-          <h1>My Listings</h1>
+          <MyListings onViewListing={(listingId)=>{
+            alert("Selected listing Id: "+listingId);
+          }}/>
         )}
 
         {currentPage === "create" && (
