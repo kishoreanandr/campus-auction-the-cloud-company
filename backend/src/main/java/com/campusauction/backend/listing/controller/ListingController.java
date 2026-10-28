@@ -82,4 +82,27 @@ public class ListingController {
 
         return ResponseEntity.ok(response);
     }
+
+@PostMapping("/{id}/approve")
+public ResponseEntity<ListingResponse> approveWinningBid(
+        @PathVariable Long id,
+        @RequestParam Long sellerId)
+        throws ListingNotFoundException, ListingRuleException {
+
+    return ResponseEntity.ok(
+            listingService.approveWinningBid(id, sellerId)
+    );
+}
+	
+	@PostMapping("/{id}/reject")
+	public ResponseEntity<ListingResponse> rejectWinningBid(
+	        @PathVariable Long id,
+	        @RequestParam Long sellerId)
+	        throws ListingNotFoundException, ListingRuleException {
+	
+	    return ResponseEntity.ok(
+	            listingService.rejectWinningBid(id, sellerId)
+	    );
+	}
+
 }

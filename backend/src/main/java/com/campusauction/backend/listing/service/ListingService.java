@@ -252,4 +252,47 @@ public class ListingService {
 		        return convertToListingResponse(savedListing);
 		    }
 
+@Transactional
+public ListingResponse approveWinningBid(Long listingId, Long sellerId)
+        throws ListingNotFoundException, ListingRuleException {
+
+    Listing listing = findListing(listingId);
+
+    checkOwnership(listing, sellerId);
+
+    if (!"PENDING_SELLER_APPROVAL".equals(listing.getStatus())) {
+        throw new ListingRuleException(
+                "This listing is not waiting for seller approval."
+        );
+    }
+
+    listing.setStatus("RESERVED");
+
+    Listing savedListing = listingRepository.save(listing);
+
+    return convertToListingResponse(savedListing);
+}
+	
+	@Transactional
+	public ListingResponse rejectWinningBid(Long listingId, Long sellerId)
+	        throws ListingNotFoundException, ListingRuleException {
+	
+	    Listing listing = findListing(listingId);
+	
+	    checkOwnership(listing, sellerId);
+	
+	    if (!"PENDING_SELLER_APPROVAL".equals(listing.getStatus())) {
+	        throw new ListingRuleException(
+	                "This listing is not waiting for seller approval."
+	        );
+	    }
+	
+	    listing.setStatus("REJECTED");
+	
+	    Listing savedListing = listingRepository.save(listing);
+	
+	    return convertToListingResponse(savedListing);
+	}
+
+
 }
