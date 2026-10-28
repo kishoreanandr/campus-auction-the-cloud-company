@@ -93,6 +93,35 @@ public class ListingService {
 	        return convertToListingResponse(listingRepository.save(listing));
 	    }
 	    
+
+		@Transactional
+		public List<ListingResponse> browseListings(
+		        String category,
+		        String search
+		) {
+		    String normalizedCategory = normalizeFilter(category);
+		    String normalizedSearch = normalizeFilter(search);
+		
+		    return listingRepository.browseListings(
+		                    LocalDateTime.now(),
+		                    normalizedCategory,
+		                    normalizedSearch
+		            )
+		            .stream()
+		            .map(this::convertToListingResponse)
+		            .toList();
+		}
+		
+		private String normalizeFilter(String value) {
+		    if (value == null || value.isBlank()) {
+		        return null;
+		    }
+		
+		    return value.trim();
+		}
+
+	    
+	    
 	    private void checkCanBeChanged(Listing listing) throws ListingRuleException {
 			// TODO Auto-generated method stub
 	    	 if (!"ACTIVE".equals(listing.getStatus())) {

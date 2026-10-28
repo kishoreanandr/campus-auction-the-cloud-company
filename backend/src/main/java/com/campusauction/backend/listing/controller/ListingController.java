@@ -64,4 +64,12 @@ public class ListingController {
     ) throws ListingNotFoundException, ListingRuleException {
         listingService.cancelListing(id, sellerId);
     }
+    
+    @GetMapping("/browse")
+    public List<ListingResponse> browseListings(
+            @RequestParam(required = false) String category,
+            @RequestParam(required = false) String search
+    ) {
+        return listingService.browseListings(category, search);
+    }
 }
