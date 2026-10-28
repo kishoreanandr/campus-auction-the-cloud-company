@@ -171,10 +171,17 @@ function ListingDetails({ listingId, user, onBack }) {
                 key={image.id}
                 src={getImageUrl(image.imagePath)}
                 alt={listing.title}
+                onError={(event) => {
+                  event.currentTarget.hidden = true;
+                  event.currentTarget.parentElement.dataset.imageError = "true";
+                }}
               />
             ))
           ) : (
             <span>No image available</span>
+          )}
+          {images.length > 0 && (
+            <span className="listing-image-fallback">Image unavailable</span>
           )}
         </div>
 

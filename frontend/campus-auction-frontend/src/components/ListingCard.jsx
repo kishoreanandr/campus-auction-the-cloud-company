@@ -4,9 +4,19 @@ function ListingCard({ listing, onView }) {
     <div className="listing-card">
       <div className="listing-image">
         {listing.image ? (
-          <img src={listing.image} alt={listing.title} />
+          <img
+            src={listing.image}
+            alt={listing.title}
+            onError={(event) => {
+              event.currentTarget.hidden = true;
+              event.currentTarget.parentElement.dataset.imageError = "true";
+            }}
+          />
         ) : (
           <span>No image available</span>
+        )}
+        {listing.image && (
+          <span className="listing-image-fallback">Image unavailable</span>
         )}
       </div>
 

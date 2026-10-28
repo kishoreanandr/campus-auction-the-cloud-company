@@ -1,7 +1,11 @@
 
 import { useEffect, useState } from "react";
 import ListingCard from "../components/ListingCard";
-import { getListings } from "../services/api";
+import {
+  getImageUrl,
+  getListingImages,
+  getListings,
+} from "../services/api";
 
 function Home({ onViewListing }) {
   const [search, setSearch] = useState("");
@@ -22,10 +26,33 @@ function Home({ onViewListing }) {
   useEffect(() => {
     let active = true;
     getListings({ category, search })
-      .then((results) => {
+      .then(async (results) => {
+        const imageResults = await Promise.allSettled(
+          results.map(async (listing) => {
+            const images = await getListingImages(listing.id);
+            return images.length > 0
+              ? getImageUrl(images[0].imagePath)
+              : "";
+          }),
+        );
+
         if (active) {
-          setListings(results);
-          setError("");
+          const listingsWithImages = results.map((listing, index) => ({
+            ...listing,
+            image: imageResults[index].status === "fulfilled"
+              ? imageResults[index].value
+              : "",
+          }));
+          const failedImageRequests = imageResults.filter(
+            (result) => result.status === "rejected",
+          ).length;
+
+          setListings(listingsWithImages);
+          setError(
+            failedImageRequests > 0
+              ? `Could not load photos for ${failedImageRequests} listing(s).`
+              : "",
+          );
         }
       })
       .catch((requestError) => {
@@ -54,21 +81,26 @@ function Home({ onViewListing }) {
       <div className="listing-filters">
         <input
           type="text"
+          aria-label="Search listings"
           placeholder="Search for books, calculators..."
           value={search}
           onChange={(event) => setSearch(event.target.value)}
         />
 
-        <select
-          value={category}
-          onChange={(event) => setCategory(event.target.value)}
-        >
-          {categories.map((item) => (
-            <option key={item} value={item}>
-              {item}
-            </option>
-          ))}
-        </select>
+        <label className="category-filter">
+          <span className="category-filter-label">Category</span>
+          <select
+            aria-label="Filter listings by category"
+            value={category}
+            onChange={(event) => setCategory(event.target.value)}
+          >
+            {categories.map((item) => (
+              <option key={item} value={item}>
+                {item === "All" ? "All categories" : item}
+              </option>
+            ))}
+          </select>
+        </label>
       </div>
 
       {error && <p className="form-message form-error" role="alert">{error}</p>}
