@@ -1,44 +1,62 @@
 
-import { useState } from "react";
-
-const sampleMyListings = [
-  {
-    id: 1,
-    title: "Scientific Calculator",
-    category: "Electronics",
-    itemCondition: "Good",
-    startingPrice: 500,
-    currentHighestBid: 650,
-    status: "ACTIVE",
-  },
-  {
-    id: 2,
-    title: "Engineering Drawing Kit",
-    category: "Stationery",
-    itemCondition: "Like New",
-    startingPrice: 250,
-    currentHighestBid: null,
-    status: "ACTIVE",
-  },
-];
+import { useCallback, useEffect, useState } from "react";
+import { cancelListing, getMyListings } from "../services/api";
 
 function MyListings({ onViewListing }) {
-  const [listings, setListings] = useState(sampleMyListings);
+  const [listings, setListings] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState("");
 
-  function handleCancel(listingId) {
+  const loadListings = useCallback(async () => {
+    try {
+      setListings(await getMyListings());
+      setError("");
+    } catch (requestError) {
+      setError(requestError.message);
+    } finally {
+      setLoading(false);
+    }
+  }, []);
+
+  useEffect(() => {
+    let active = true;
+    getMyListings()
+      .then((result) => {
+        if (active) {
+          setListings(result);
+          setError("");
+        }
+      })
+      .catch((requestError) => {
+        if (active) {
+          setError(requestError.message);
+        }
+      })
+      .finally(() => {
+        if (active) {
+          setLoading(false);
+        }
+      });
+
+    return () => {
+      active = false;
+    };
+  }, []);
+
+  async function handleCancel(listingId) {
     const confirmed = window.confirm(
       "Are you sure you want to cancel this listing?"
     );
 
     if (!confirmed) return;
 
-    setListings((previous) =>
-      previous.map((listing) =>
-        listing.id === listingId
-          ? { ...listing, status: "CANCELLED" }
-          : listing
-      )
-    );
+    setError("");
+    try {
+      await cancelListing(listingId);
+      await loadListings();
+    } catch (requestError) {
+      setError(requestError.message);
+    }
   }
 
   return (
@@ -48,7 +66,10 @@ function MyListings({ onViewListing }) {
         Manage the items you've put up for auction.
       </p>
 
-      {listings.length === 0 ? (
+      {error && <p className="form-message form-error" role="alert">{error}</p>}
+      {loading ? (
+        <p role="status">Loading your listings…</p>
+      ) : listings.length === 0 ? (
         <p>You haven't created any listings yet.</p>
       ) : (
         <div className="my-listings-list">
@@ -91,7 +112,9 @@ function MyListings({ onViewListing }) {
                   View Details
                 </button>
 
-                {listing.status === "ACTIVE" && (
+                {listing.status === "ACTIVE" &&
+                  listing.currentHighestBid == null &&
+                  new Date(listing.closingAt) > new Date() && (
                   <button
                     type="button"
                     className="cancel-button"

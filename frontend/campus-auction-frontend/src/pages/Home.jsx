@@ -1,49 +1,14 @@
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import ListingCard from "../components/ListingCard";
-
-const sampleListings = [
-  {
-    id: 1,
-    title: "Scientific Calculator",
-    category: "Electronics",
-    itemCondition: "Good",
-    startingPrice: 500,
-    currentHighestBid: null,
-    image: "",
-  },
-  {
-    id: 2,
-    title: "Engineering Drawing Kit",
-    category: "Stationery",
-    itemCondition: "Like New",
-    startingPrice: 250,
-    currentHighestBid: 300,
-    image: "",
-  },
-  {
-    id: 3,
-    title: "Data Structures Textbook",
-    category: "Books",
-    itemCondition: "Good",
-    startingPrice: 200,
-    currentHighestBid: null,
-    image: "",
-  },
-  {
-    id: 4,
-    title: "Cycle",
-    category: "Transport",
-    itemCondition: "Used",
-    startingPrice: 1500,
-    currentHighestBid: null,
-    image: "",
-  },
-];
+import { getListings } from "../services/api";
 
 function Home({ onViewListing }) {
   const [search, setSearch] = useState("");
   const [category, setCategory] = useState("All");
+  const [listings, setListings] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState("");
 
   const categories = [
     "All",
@@ -51,17 +16,33 @@ function Home({ onViewListing }) {
     "Stationery",
     "Books",
     "Transport",
+    "Others",
   ];
 
-  const filteredListings = sampleListings.filter((listing) => {
-    const matchesSearch =
-      listing.title.toLowerCase().includes(search.toLowerCase());
+  useEffect(() => {
+    let active = true;
+    getListings({ category, search })
+      .then((results) => {
+        if (active) {
+          setListings(results);
+          setError("");
+        }
+      })
+      .catch((requestError) => {
+        if (active) {
+          setError(requestError.message);
+        }
+      })
+      .finally(() => {
+        if (active) {
+          setLoading(false);
+        }
+      });
 
-    const matchesCategory =
-      category === "All" || listing.category === category;
-
-    return matchesSearch && matchesCategory;
-  });
+    return () => {
+      active = false;
+    };
+  }, [category, search]);
 
   return (
     <section className="home-page">
@@ -90,19 +71,24 @@ function Home({ onViewListing }) {
         </select>
       </div>
 
-      <div className="listing-grid">
-        {filteredListings.length > 0 ? (
-          filteredListings.map((listing) => (
+      {error && <p className="form-message form-error" role="alert">{error}</p>}
+      {loading ? (
+        <p role="status">Loading listings…</p>
+      ) : (
+        <div className="listing-grid">
+          {listings.length > 0 ? (
+            listings.map((listing) => (
             <ListingCard
               key={listing.id}
               listing={listing}
               onView={onViewListing}
             />
           ))
-        ) : (
-          <p>No listings found. Try another search.</p>
-        )}
-      </div>
+          ) : !error ? (
+            <p>No listings found. Try another search.</p>
+          ) : null}
+        </div>
+      )}
     </section>
   );
 }

@@ -1,7 +1,13 @@
 
 import { useState } from "react";
+import { createListing, uploadListingImage } from "../services/api";
 
-function CreateListing({ onBack }) {
+function CreateListing({ onBack, onCreated }) {
+  const [minimumClosingAt] = useState(() =>
+    new Date(Date.now() - new Date().getTimezoneOffset() * 60000)
+      .toISOString()
+      .slice(0, 16),
+  );
   const [formData, setFormData] = useState({
     title: "",
     category: "Books",
@@ -13,6 +19,9 @@ function CreateListing({ onBack }) {
   });
 
   const [message, setMessage] = useState("");
+  const [error, setError] = useState("");
+  const [images, setImages] = useState([]);
+  const [submitting, setSubmitting] = useState(false);
 
   function handleChange(event) {
     const { name, value } = event.target;
@@ -23,9 +32,10 @@ function CreateListing({ onBack }) {
     }));
 
     setMessage("");
+    setError("");
   }
 
-  function handleSubmit(event) {
+  async function handleSubmit(event) {
     event.preventDefault();
 
     const startingPrice = Number(formData.startingPrice);
@@ -47,13 +57,40 @@ function CreateListing({ onBack }) {
       return;
     }
 
-    console.log("Listing form data:", {
-      ...formData,
-      startingPrice,
-      minimumIncrement,
-    });
+    setSubmitting(true);
+    setError("");
+    setMessage("");
+    let listing;
+    try {
+      listing = await createListing({
+        ...formData,
+        startingPrice,
+        minimumIncrement,
+      });
+    } catch (requestError) {
+      setError(requestError.message);
+      setSubmitting(false);
+      return;
+    }
 
-    setMessage("Form validated! Backend submission will be added next.");
+    const failedUploads = [];
+    for (const image of images) {
+      try {
+        await uploadListingImage(listing.id, image);
+      } catch (uploadError) {
+        failedUploads.push(`${image.name}: ${uploadError.message}`);
+      }
+    }
+    if (failedUploads.length > 0) {
+      window.alert(
+        `Listing created, but some photo uploads failed:\n${failedUploads.join("\n")}\n` +
+          "You can retry photo uploads from the listing details.",
+      );
+    }
+
+    setMessage("Listing created successfully.");
+    setSubmitting(false);
+    onCreated();
   }
 
   return (
@@ -149,12 +186,29 @@ function CreateListing({ onBack }) {
             id="closingAt"
             name="closingAt"
             type="datetime-local"
-            min={new Date(Date.now() - new Date().getTimezoneOffset() * 60000)
-              .toISOString()
-              .slice(0, 16)}
+            min={minimumClosingAt}
             value={formData.closingAt}
             onChange={handleChange}
             required
+          />
+
+          <label htmlFor="listing-images">Photos (up to 5, 5 MB each)</label>
+          <input
+            id="listing-images"
+            type="file"
+            accept="image/jpeg,image/png,image/webp"
+            multiple
+            onChange={(event) => {
+              const selectedImages = Array.from(event.target.files || []);
+              if (selectedImages.length > 5) {
+                setError("You can upload at most 5 photos.");
+                event.target.value = "";
+                setImages([]);
+                return;
+              }
+              setImages(selectedImages);
+              setError("");
+            }}
           />
 
           {message && (
@@ -162,9 +216,14 @@ function CreateListing({ onBack }) {
               {message}
             </p>
           )}
+          {error && <p className="form-message form-error" role="alert">{error}</p>}
 
-          <button type="submit" className="submit-listing-button">
-            Create Listing
+          <button
+            type="submit"
+            className="submit-listing-button"
+            disabled={submitting}
+          >
+            {submitting ? "Creating…" : "Create Listing"}
           </button>
         </form>
       </div>
